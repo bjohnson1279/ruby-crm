@@ -10,7 +10,7 @@ module Api
       end
 
       def create
-        holdings_params = params.permit(holdings: [:symbol, :description, :quantity, :market_value, :as_of_date])[:holdings] || []
+        holdings_params = params.permit(holdings: [ :symbol, :description, :quantity, :market_value, :as_of_date ])[:holdings] || []
 
         if holdings_params.empty?
           return render_json_error("No holdings data provided", status: :bad_request)

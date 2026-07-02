@@ -15,7 +15,7 @@ class CreateContactsAndHouseholds < ActiveRecord::Migration[8.1]
       t.date :date_of_birth
       t.timestamps
     end
-    add_index :contacts, [:firm_id, :email]
+    add_index :contacts, [ :firm_id, :email ]
 
     # Add foreign key from households to contacts for primary contact link
     safety_assured do
@@ -28,7 +28,7 @@ class CreateContactsAndHouseholds < ActiveRecord::Migration[8.1]
       t.string :role, null: false, default: "member"
       t.timestamps
     end
-    add_index :household_memberships, [:household_id, :contact_id], unique: true
+    add_index :household_memberships, [ :household_id, :contact_id ], unique: true
 
     create_table :relationships do |t|
       t.references :firm, null: false, foreign_key: true
@@ -37,6 +37,6 @@ class CreateContactsAndHouseholds < ActiveRecord::Migration[8.1]
       t.string :relationship_type, null: false
       t.timestamps
     end
-    add_index :relationships, [:contact_id, :related_contact_id], unique: true
+    add_index :relationships, [ :contact_id, :related_contact_id ], unique: true
   end
 end

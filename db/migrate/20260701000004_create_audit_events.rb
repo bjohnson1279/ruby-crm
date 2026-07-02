@@ -10,8 +10,8 @@ class CreateAuditEvents < ActiveRecord::Migration[8.1]
       t.datetime :occurred_at, null: false
       t.datetime :created_at, null: false
     end
-    add_index :audit_events, [:firm_id, :occurred_at]
-    add_index :audit_events, [:auditable_type, :auditable_id, :occurred_at], name: "idx_audit_events_on_auditable"
+    add_index :audit_events, [ :firm_id, :occurred_at ]
+    add_index :audit_events, [ :auditable_type, :auditable_id, :occurred_at ], name: "idx_audit_events_on_auditable"
 
     # Enforce database-level immutability using MySQL triggers
     safety_assured do
