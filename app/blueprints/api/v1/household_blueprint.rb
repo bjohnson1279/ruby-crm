@@ -13,7 +13,7 @@ module Api
         association :primary_contact, blueprint: Api::V1::ContactBlueprint, view: :summary
         association :household_memberships, name: :members, blueprint: Api::V1::HouseholdMembershipBlueprint
         association :investment_accounts, blueprint: Api::V1::InvestmentAccountBlueprint, view: :summary
-        
+
         field :total_aum do |household|
           household.investment_accounts.select { |a| a.status == "active" }.sum(&:current_value)
         end

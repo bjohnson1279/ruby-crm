@@ -4,7 +4,7 @@ module Api
     class AuditEventBlueprint < Blueprinter::Base
       identifier :id
       fields :action, :payload, :ip_address, :occurred_at
-      
+
       field :actor_name do |event|
         event.actor&.name
       end

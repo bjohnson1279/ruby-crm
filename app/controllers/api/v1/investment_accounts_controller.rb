@@ -62,7 +62,7 @@ module Api
 
       def account_params
         params.require(:investment_account).permit(
-          :contact_id, :household_id, :account_type_id, 
+          :contact_id, :household_id, :account_type_id,
           :account_number, :custodian, :status
         )
       end
