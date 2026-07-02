@@ -1,0 +1,259 @@
+<div class="space-y-8">
+  <div class="flex justify-between items-center bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-md">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight text-white">Database Integrity Checks</h2>
+      <p class="text-sm text-slate-400 mt-1">Real-time MySQL relational health and domain boundary audits</p>
+    </div>
+    <div class="text-right">
+      <span class="text-xs text-slate-500 block">Current Time</span>
+      <span class="text-sm font-mono text-cyan-400 font-semibold"><%= Time.current.strftime("%Y-%m-%d %H:%M:%S") %></span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+    <% orphaned_count = @integrity_report[:orphaned_accounts].size %>
+    <a href="#orphaned_accounts" class="block p-6 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg <%= orphaned_count > 0 ? 'bg-red-950/20 border-red-500/30 hover:border-red-500' : 'bg-slate-900/40 border-slate-800 hover:border-emerald-500/50' %>">
+      <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Orphaned Accounts</div>
+      <div class="mt-2 flex items-baseline justify-between">
+        <span class="text-4xl font-extrabold <%= orphaned_count > 0 ? 'text-red-400' : 'text-emerald-400' %>"><%= orphaned_count %></span>
+        <span class="text-xs <%= orphaned_count > 0 ? 'text-red-500' : 'text-slate-500' %> font-mono">broken FKs</span>
+      </div>
+    </a>
+
+    <% no_primary_count = @integrity_report[:households_without_primary].size %>
+    <a href="#households_without_primary" class="block p-6 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg <%= no_primary_count > 0 ? 'bg-amber-950/20 border-amber-500/30 hover:border-amber-500' : 'bg-slate-900/40 border-slate-800 hover:border-emerald-500/50' %>">
+      <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Missing Primary</div>
+      <div class="mt-2 flex items-baseline justify-between">
+        <span class="text-4xl font-extrabold <%= no_primary_count > 0 ? 'text-amber-400' : 'text-emerald-400' %>"><%= no_primary_count %></span>
+        <span class="text-xs <%= no_primary_count > 0 ? 'text-amber-500' : 'text-slate-500' %> font-mono">households</span>
+      </div>
+    </a>
+
+    <% drift_count = @integrity_report[:aum_drift].size %>
+    <a href="#aum_drift" class="block p-6 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg <%= drift_count > 0 ? 'bg-red-950/20 border-red-500/30 hover:border-red-500' : 'bg-slate-900/40 border-slate-800 hover:border-emerald-500/50' %>">
+      <div class="text-xs font-bold uppercase tracking-wider text-slate-400">AUM Drift</div>
+      <div class="mt-2 flex items-baseline justify-between">
+        <span class="text-4xl font-extrabold <%= drift_count > 0 ? 'text-red-400' : 'text-emerald-400' %>"><%= drift_count %></span>
+        <span class="text-xs <%= drift_count > 0 ? 'text-red-500' : 'text-slate-500' %> font-mono">accounts</span>
+      </div>
+    </a>
+
+    <% no_household_count = @integrity_report[:contacts_without_household].size %>
+    <a href="#contacts_without_household" class="block p-6 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg <%= no_household_count > 0 ? 'bg-amber-950/20 border-amber-500/30 hover:border-amber-500' : 'bg-slate-900/40 border-slate-800 hover:border-emerald-500/50' %>">
+      <div class="text-xs font-bold uppercase tracking-wider text-slate-400">No Household</div>
+      <div class="mt-2 flex items-baseline justify-between">
+        <span class="text-4xl font-extrabold <%= no_household_count > 0 ? 'text-amber-400' : 'text-emerald-400' %>"><%= no_household_count %></span>
+        <span class="text-xs <%= no_household_count > 0 ? 'text-amber-500' : 'text-slate-500' %> font-mono">contacts</span>
+      </div>
+    </a>
+
+    <% stale_count = @integrity_report[:stale_holdings].size %>
+    <a href="#stale_holdings" class="block p-6 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg <%= stale_count > 0 ? 'bg-amber-950/20 border-amber-500/30 hover:border-amber-500' : 'bg-slate-900/40 border-slate-800 hover:border-emerald-500/50' %>">
+      <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Stale Holdings</div>
+      <div class="mt-2 flex items-baseline justify-between">
+        <span class="text-4xl font-extrabold <%= stale_count > 0 ? 'text-amber-400' : 'text-emerald-400' %>"><%= stale_count %></span>
+        <span class="text-xs <%= stale_count > 0 ? 'text-amber-500' : 'text-slate-500' %> font-mono">> 7 days</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="space-y-10 mt-10">
+    <section id="orphaned_accounts" class="bg-slate-900 rounded-xl border border-slate-800 shadow-lg overflow-hidden scroll-mt-6">
+      <div class="bg-slate-850 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-white flex items-center">
+          <span class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2.5"></span>
+          Orphaned Accounts Details
+        </h3>
+        <span class="text-xs font-mono text-slate-400"><%= orphaned_count %> records</span>
+      </div>
+      <div class="p-6">
+        <% if orphaned_count == 0 %>
+          <p class="text-slate-400 text-sm">No orphaned accounts detected. All account owners belong to their linked household.</p>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-800 text-sm text-left">
+              <thead>
+                <tr class="text-slate-400 uppercase text-xs font-bold tracking-wider">
+                  <th class="pb-3">Account Number</th>
+                  <th class="pb-3">Custodian</th>
+                  <th class="pb-3">Owner Contact</th>
+                  <th class="pb-3">Household Link</th>
+                  <th class="pb-3 text-right">Action Needed</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-850">
+                <% @integrity_report[:orphaned_accounts].each do |row| %>
+                  <tr class="hover:bg-slate-850/50">
+                    <td class="py-3 font-mono text-cyan-400"><%= row["account_number"] %></td>
+                    <td class="py-3 text-slate-300"><%= row["custodian"] %></td>
+                    <td class="py-3 font-medium"><%= "#{row['first_name']} #{row['last_name']}" %> <span class="text-xs text-slate-555 font-mono">(ID: <%= row["contact_id"] %>)</span></td>
+                    <td class="py-3 text-slate-300"><%= row["household_name"] %> <span class="text-xs text-slate-555 font-mono">(ID: <%= row["household_id"] %>)</span></td>
+                    <td class="py-3 text-right text-xs text-red-400 font-medium">Link owner to household memberships</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section id="households_without_primary" class="bg-slate-900 rounded-xl border border-slate-800 shadow-lg overflow-hidden scroll-mt-6">
+      <div class="bg-slate-850 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-white flex items-center">
+          <span class="h-2.5 w-2.5 rounded-full bg-amber-500 mr-2.5"></span>
+          Households Without Primary Contact
+        </h3>
+        <span class="text-xs font-mono text-slate-400"><%= no_primary_count %> records</span>
+      </div>
+      <div class="p-6">
+        <% if no_primary_count == 0 %>
+          <p class="text-slate-400 text-sm">All households have a valid primary contact designated as a primary membership.</p>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-800 text-sm text-left">
+              <thead>
+                <tr class="text-slate-400 uppercase text-xs font-bold tracking-wider">
+                  <th class="pb-3">Household ID</th>
+                  <th class="pb-3">Household Name</th>
+                  <th class="pb-3">Current Primary Contact ID</th>
+                  <th class="pb-3 text-right">Reason</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-850">
+                <% @integrity_report[:households_without_primary].each do |row| %>
+                  <tr class="hover:bg-slate-850/50">
+                    <td class="py-3 font-mono text-slate-400"><%= row["household_id"] %></td>
+                    <td class="py-3 font-medium text-slate-200"><%= row["household_name"] %></td>
+                    <td class="py-3 font-mono text-amber-400"><%= row["primary_contact_id"] || 'NULL' %></td>
+                    <td class="py-3 text-right text-xs text-amber-400">Primary Contact ID is not a member or role is not 'primary'</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section id="aum_drift" class="bg-slate-900 rounded-xl border border-slate-800 shadow-lg overflow-hidden scroll-mt-6">
+      <div class="bg-slate-850 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-white flex items-center">
+          <span class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2.5"></span>
+          AUM Drift Detection Details
+        </h3>
+        <span class="text-xs font-mono text-slate-400"><%= drift_count %> records</span>
+      </div>
+      <div class="p-6">
+        <% if drift_count == 0 %>
+          <p class="text-slate-400 text-sm">No AUM drift detected. All investment account values match the exact sum of their holdings.</p>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-800 text-sm text-left">
+              <thead>
+                <tr class="text-slate-400 uppercase text-xs font-bold tracking-wider">
+                  <th class="pb-3">Account Number</th>
+                  <th class="pb-3 text-right">Denormalized Value</th>
+                  <th class="pb-3 text-right">Actual Sum of Holdings</th>
+                  <th class="pb-3 text-right text-red-400">Drift Amount</th>
+                  <th class="pb-3 text-right">Remediation</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-850">
+                <% @integrity_report[:aum_drift].each do |row| %>
+                  <tr class="hover:bg-slate-850/50">
+                    <td class="py-3 font-mono text-cyan-400"><%= row["account_number"] %></td>
+                    <td class="py-3 text-right font-mono text-slate-300">$<%= number_with_precision(row["denormalized_value"], precision: 2) %></td>
+                    <td class="py-3 text-right font-mono text-slate-300">$<%= number_with_precision(row["actual_value"], precision: 2) %></td>
+                    <td class="py-3 text-right font-mono text-red-400 font-semibold">-$<%= number_with_precision(row["drift_amount"], precision: 2) %></td>
+                    <td class="py-3 text-right text-xs text-cyan-400 font-medium">Run RecalculateValue service</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section id="contacts_without_household" class="bg-slate-900 rounded-xl border border-slate-800 shadow-lg overflow-hidden scroll-mt-6">
+      <div class="bg-slate-850 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-white flex items-center">
+          <span class="h-2.5 w-2.5 rounded-full bg-amber-500 mr-2.5"></span>
+          Contacts Without Household Details
+        </h3>
+        <span class="text-xs font-mono text-slate-400"><%= no_household_count %> records</span>
+      </div>
+      <div class="p-6">
+        <% if no_household_count == 0 %>
+          <p class="text-slate-400 text-sm">All contacts are associated with at least one household.</p>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-800 text-sm text-left">
+              <thead>
+                <tr class="text-slate-400 uppercase text-xs font-bold tracking-wider">
+                  <th class="pb-3">Contact ID</th>
+                  <th class="pb-3">Contact Name</th>
+                  <th class="pb-3">Email</th>
+                  <th class="pb-3 text-right">Reason</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-850">
+                <% @integrity_report[:contacts_without_household].each do |row| %>
+                  <tr class="hover:bg-slate-850/50">
+                    <td class="py-3 font-mono text-slate-400"><%= row["contact_id"] %></td>
+                    <td class="py-3 font-medium text-slate-200"><%= "#{row['first_name']} #{row['last_name']}" %></td>
+                    <td class="py-3 text-slate-300 font-mono"><%= row["email"] %></td>
+                    <td class="py-3 text-right text-xs text-amber-400">Unlinked contact with no household memberships</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section id="stale_holdings" class="bg-slate-900 rounded-xl border border-slate-800 shadow-lg overflow-hidden scroll-mt-6">
+      <div class="bg-slate-850 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-white flex items-center">
+          <span class="h-2.5 w-2.5 rounded-full bg-amber-500 mr-2.5"></span>
+          Stale Holdings Details
+        </h3>
+        <span class="text-xs font-mono text-slate-400"><%= stale_count %> records</span>
+      </div>
+      <div class="p-6">
+        <% if stale_count == 0 %>
+          <p class="text-slate-400 text-sm">All holding position as-of-dates are up-to-date (under 7 days old).</p>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-800 text-sm text-left">
+              <thead>
+                <tr class="text-slate-400 uppercase text-xs font-bold tracking-wider">
+                  <th class="pb-3">Symbol</th>
+                  <th class="pb-3">As Of Date</th>
+                  <th class="pb-3">Account Number</th>
+                  <th class="pb-3">Owner Name</th>
+                  <th class="pb-3 text-right">Age Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-850">
+                <% @integrity_report[:stale_holdings].each do |row| %>
+                  <tr class="hover:bg-slate-850/50">
+                    <td class="py-3 font-bold text-indigo-400"><%= row["symbol"] %></td>
+                    <td class="py-3 font-mono text-slate-300"><%= row["as_of_date"] %></td>
+                    <td class="py-3 font-mono text-cyan-400"><%= row["account_number"] %></td>
+                    <td class="py-3 text-slate-200"><%= "#{row['first_name']} #{row['last_name']}" %></td>
+                    <td class="py-3 text-right text-xs text-amber-500 font-semibold font-mono">
+                      <%= (Date.current - Date.parse(row["as_of_date"].to_s)).to_i rescue '?' %> days old
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="space-y-6">
+  <div class="flex justify-between items-center bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-md">
+    <div>
+      <%= link_to "&larr; Back to Timeline".html_safe, admin_audit_events_path, class: "text-slate-400 hover:text-white text-xs font-semibold uppercase tracking-wider block mb-2" %>
+      <h2 class="text-2xl font-bold tracking-tight text-white flex items-center">
+        Audit Event Details
+        <span class="ml-3 px-2 py-0.5 rounded text-xs font-mono font-bold uppercase <%= case @audit_event.action; when 'created'; 'bg-emerald-950/50 text-emerald-400 border border-emerald-500/20'; when 'deleted'; 'bg-red-950/50 text-red-400 border border-red-500/20'; else 'bg-blue-950/50 text-blue-400 border border-blue-500/20'; end %>">
+          <%= @audit_event.action %>
+        </span>
+      </h2>
+    </div>
+    <span class="text-xs text-slate-500 font-mono">Event ID: <%= @audit_event.id %></span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-1 bg-slate-900 p-6 rounded-lg border border-slate-800 space-y-6 shadow-md">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Occurred At</span>
+        <span class="text-sm font-mono text-slate-200"><%= @audit_event.occurred_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+      </div>
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Actor</span>
+        <span class="text-sm text-slate-200"><%= @audit_event.actor&.name || 'System' %></span>
+        <span class="text-xs text-slate-500 font-mono block"><%= @audit_event.actor_type %> (ID: <%= @audit_event.actor_id %>)</span>
+      </div>
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Auditable Target</span>
+        <span class="text-sm text-slate-200"><%= @audit_event.auditable_type.to_s.demodulize %></span>
+        <span class="text-xs text-slate-500 font-mono block">ID: <%= @audit_event.auditable_id %></span>
+      </div>
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">IP Address</span>
+        <span class="text-sm font-mono text-slate-200"><%= @audit_event.ip_address.presence || 'N/A' %></span>
+      </div>
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Created At</span>
+        <span class="text-sm font-mono text-slate-200"><%= @audit_event.created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+      </div>
+    </div>
+
+    <div class="md:col-span-2 bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-md space-y-4">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">JSON Payload Diff / Snapshot</span>
+      <div class="bg-slate-950 p-4 rounded border border-slate-850 overflow-x-auto">
+        <pre class="text-xs font-mono text-cyan-400 whitespace-pre-wrap"><%= JSON.pretty_generate(@audit_event.payload) rescue @audit_event.payload.inspect %></pre>
+      </div>
+      <div class="rounded border border-slate-800/40 p-4 bg-slate-950/20 text-xs text-slate-400 flex items-start space-x-2">
+        <span class="text-amber-500 font-bold font-mono">⚠️ Security Warning:</span>
+        <span>This record is strictly read-only and immutable. It is protected by active database engine UPDATE/DELETE locks.</span>
+      </div>
+    </div>
+  </div>
+</div>
