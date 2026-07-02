@@ -5,7 +5,7 @@ module Admin
 
     before_action :set_context
 
-    layout 'admin'
+    layout "admin"
 
     private
 
