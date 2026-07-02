@@ -6,8 +6,8 @@ module Compliance
 
       # 1. Orphaned Accounts (where account owner contact is not in the account's linked household)
       orphaned_sql = <<~SQL
-        SELECT a.id AS account_id, a.account_number, a.custodian, 
-               c.id AS contact_id, c.first_name, c.last_name, 
+        SELECT a.id AS account_id, a.account_number, a.custodian,#{' '}
+               c.id AS contact_id, c.first_name, c.last_name,#{' '}
                h.id AS household_id, h.name AS household_name
         FROM investment_accounts a
         JOIN contacts c ON a.contact_id = c.id
@@ -26,8 +26,8 @@ module Compliance
 
       # 3. AUM Drift (accounts where denormalized current_value != SUM(holdings.market_value))
       drift_sql = <<~SQL
-        SELECT a.id AS account_id, a.account_number, a.current_value AS denormalized_value, 
-               COALESCE(SUM(ho.market_value), 0) AS actual_value, 
+        SELECT a.id AS account_id, a.account_number, a.current_value AS denormalized_value,#{' '}
+               COALESCE(SUM(ho.market_value), 0) AS actual_value,#{' '}
                ABS(a.current_value - COALESCE(SUM(ho.market_value), 0)) AS drift_amount
         FROM investment_accounts a
         LEFT JOIN holdings ho ON ho.investment_account_id = a.id
@@ -46,7 +46,7 @@ module Compliance
 
       # 5. Stale holdings (as_of_date older than threshold_date)
       stale_sql = <<~SQL
-        SELECT ho.id AS holding_id, ho.symbol, ho.as_of_date, a.account_number, 
+        SELECT ho.id AS holding_id, ho.symbol, ho.as_of_date, a.account_number,#{' '}
                c.first_name, c.last_name
         FROM holdings ho
         JOIN investment_accounts a ON ho.investment_account_id = a.id
@@ -55,13 +55,13 @@ module Compliance
       SQL
 
       conn = ActiveRecord::Base.connection
-      
+
       {
-        orphaned_accounts: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([orphaned_sql, firm_id])),
-        households_without_primary: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([households_sql, firm_id])),
-        aum_drift: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([drift_sql, firm_id])),
-        contacts_without_household: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([contacts_sql, firm_id])),
-        stale_holdings: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([stale_sql, firm_id, threshold_date]))
+        orphaned_accounts: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([ orphaned_sql, firm_id ])),
+        households_without_primary: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([ households_sql, firm_id ])),
+        aum_drift: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([ drift_sql, firm_id ])),
+        contacts_without_household: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([ contacts_sql, firm_id ])),
+        stale_holdings: conn.exec_query(ActiveRecord::Base.sanitize_sql_array([ stale_sql, firm_id, threshold_date ]))
       }
     end
   end

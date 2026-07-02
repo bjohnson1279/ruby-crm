@@ -18,7 +18,7 @@ module Accounts
         LIMIT ?
       SQL
 
-      sanitized_sql = ActiveRecord::Base.sanitize_sql_array([sql, firm_id, limit])
+      sanitized_sql = ActiveRecord::Base.sanitize_sql_array([ sql, firm_id, limit ])
       rows = ActiveRecord::Base.connection.exec_query(sanitized_sql, "AUM by contact")
 
       rows.map do |row|

@@ -8,9 +8,9 @@ module Contacts
 
     has_many :household_memberships, class_name: "Contacts::HouseholdMembership", dependent: :destroy
     has_many :households, through: :household_memberships, class_name: "Contacts::Household"
-    
+
     has_many :relationships, class_name: "Contacts::Relationship", dependent: :destroy
-    
+
     # Financial accounts owned by the contact
     has_many :investment_accounts, class_name: "Accounts::InvestmentAccount", foreign_key: :contact_id
 

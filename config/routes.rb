@@ -4,19 +4,19 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :households, only: [:index, :show, :create, :update]
-      resources :contacts, only: [:index, :show, :create, :update]
-      resources :investment_accounts, only: [:index, :show, :create, :update] do
-        resources :holdings, only: [:index, :create]
+      resources :households, only: [ :index, :show, :create, :update ]
+      resources :contacts, only: [ :index, :show, :create, :update ]
+      resources :investment_accounts, only: [ :index, :show, :create, :update ] do
+        resources :holdings, only: [ :index, :create ]
       end
-      resources :audit_events, only: [:index]
+      resources :audit_events, only: [ :index ]
       get "dashboard/aum", to: "dashboard#aum"
     end
   end
 
   namespace :admin do
     root to: "dashboard#show"
-    resources :audit_events, only: [:index, :show]
+    resources :audit_events, only: [ :index, :show ]
     get "integrity", to: "dashboard#integrity"
   end
 end

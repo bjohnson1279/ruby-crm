@@ -14,9 +14,9 @@ module Contacts
           actor: actor,
           action: "updated",
           auditable: household,
-          payload: { 
+          payload: {
             message: "Added contact #{contact.name} (ID: #{contact.id}) as #{role} to household",
-            membership_id: membership.id 
+            membership_id: membership.id
           },
           ip_address: ip_address
         )
