@@ -93,16 +93,37 @@ curl -X GET http://localhost:3000/api/v1/contacts \
 
 ---
 
-## 6. Code Quality & Linting
+## 6. Running the Test Suite
+
+The application uses **Minitest** for database model validation, domain service flows, and controller integration testing.
+
+### Running under WSL (Recommended)
+Since the Ruby environment is configured inside Windows Subsystem for Linux (WSL), execute commands using the `wsl` prefix and the full path to `bundle`:
+* **Prepare the Test Database**:
+  ```bash
+  wsl /home/brent/.local/share/gem/ruby/3.3.0/bin/bundle exec rails db:test:prepare
+  ```
+* **Run all Tests**:
+  ```bash
+  wsl /home/brent/.local/share/gem/ruby/3.3.0/bin/bundle exec rails test
+  ```
+
+> [!WARNING]
+> **Windows File Association Pop-up**: If you run `bin/rails` directly from Windows cmd/powershell, Windows will treat the extensionless `bin/rails` as a document and trigger an "Open with..." program selection pop-up. Always prefix commands with `wsl` or execute them directly inside a WSL bash shell.
+
+---
+
+## 7. Code Quality & Linting
 
 Before pushing changes, run the code quality and security analysis suites:
 
 * **Security Vulnerabilities Audit**:
   ```bash
-  bin/brakeman
-  bin/bundler-audit
+  wsl /home/brent/.local/share/gem/ruby/3.3.0/bin/bundle exec brakeman
+  wsl /home/brent/.local/share/gem/ruby/3.3.0/bin/bundle exec bundler-audit
   ```
 * **Ruby Style Guide & Linter**:
   ```bash
-  bin/rubocop
+  wsl /home/brent/.local/share/gem/ruby/3.3.0/bin/bundle exec rubocop
   ```
+
