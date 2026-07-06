@@ -50,3 +50,37 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Prepare Database
+        run: bin/rails db:test:prepare
+        env:
+          RAILS_ENV: test
+          DB_HOST: 127.0.0.1
+
+      - name: Run Tests
+        run: bin/rails test
+        env:
+          RAILS_ENV: test
+          DB_HOST: 127.0.0.1
+
+
