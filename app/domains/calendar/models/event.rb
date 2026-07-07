@@ -1,5 +1,7 @@
 module Calendar
   class Event < ApplicationRecord
+    self.table_name = "calendar_events"
+
     include FirmScoped
 
     belongs_to :user

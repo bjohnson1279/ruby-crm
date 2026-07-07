@@ -190,6 +190,45 @@ ActiveRecord::Base.transaction do
     }
   )
 
+  # 12. Create Sample Calendar Events
+  Calendar::CreateEvent.call(
+    firm: firm,
+    actor: user1,
+    params: {
+      contact: smith_john,
+      title: "Annual Financial Plan Review",
+      description: "Review comprehensive retirement roadmap and educational funding accounts.",
+      start_at: 2.days.from_now.beginning_of_day + 10.hours,
+      end_at: 2.days.from_now.beginning_of_day + 11.hours + 30.minutes,
+      color: "green"
+    }
+  )
+
+  Calendar::CreateEvent.call(
+    firm: firm,
+    actor: user1,
+    params: {
+      contact: vander_gloria,
+      title: "Estate Plan Coordination",
+      description: "Discuss legacy transfer structures with trust attorneys.",
+      start_at: 5.days.from_now.beginning_of_day + 14.hours,
+      end_at: 5.days.from_now.beginning_of_day + 15.hours + 30.minutes,
+      color: "purple"
+    }
+  )
+
+  Calendar::CreateEvent.call(
+    firm: firm,
+    actor: user2,
+    params: {
+      title: "Weekly Advisory Team Sync",
+      description: "Internal firm operations and client service workflow reviews.",
+      start_at: 1.day.from_now.beginning_of_day + 9.hours,
+      end_at: 1.day.from_now.beginning_of_day + 10.hours,
+      color: "blue"
+    }
+  )
+
   puts "Seeding completed successfully!"
   puts "- Created Firm: #{firm.name}"
   puts "- Created Users: #{User.count}"

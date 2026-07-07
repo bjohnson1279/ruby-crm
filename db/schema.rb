@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_07_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_07_000003) do
   create_table "account_types", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "firm_id", null: false
@@ -36,6 +36,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000002) do
     t.index ["auditable_type", "auditable_id"], name: "index_audit_events_on_auditable"
     t.index ["firm_id", "occurred_at"], name: "index_audit_events_on_firm_id_and_occurred_at"
     t.index ["firm_id"], name: "index_audit_events_on_firm_id"
+  end
+
+  create_table "calendar_events", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "color", default: "blue", null: false
+    t.bigint "contact_id"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.datetime "end_at", null: false
+    t.bigint "firm_id", null: false
+    t.datetime "start_at", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["contact_id"], name: "index_calendar_events_on_contact_id"
+    t.index ["end_at"], name: "index_calendar_events_on_end_at"
+    t.index ["firm_id"], name: "index_calendar_events_on_firm_id"
+    t.index ["start_at"], name: "index_calendar_events_on_start_at"
+    t.index ["user_id"], name: "index_calendar_events_on_user_id"
   end
 
   create_table "contacts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -173,6 +191,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000002) do
 
   add_foreign_key "account_types", "firms"
   add_foreign_key "audit_events", "firms"
+  add_foreign_key "calendar_events", "contacts"
+  add_foreign_key "calendar_events", "firms"
+  add_foreign_key "calendar_events", "users"
   add_foreign_key "contacts", "firms"
   add_foreign_key "holdings", "investment_accounts"
   add_foreign_key "household_memberships", "contacts"
