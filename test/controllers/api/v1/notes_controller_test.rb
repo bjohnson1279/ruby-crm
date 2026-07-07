@@ -53,6 +53,36 @@ module Api
         json_response = JSON.parse(response.body)
         assert_equal "New Created Note", json_response["data"]["body"]
       end
+
+      test "should filter index by contact" do
+        another_contact = Contacts::Contact.create!(
+          first_name: "Jane",
+          last_name: "Doe",
+          email: "jane.doe@example.com"
+        )
+        another_note = Contacts::Note.create!(
+          user: @user,
+          contact: another_contact,
+          body: "Another note",
+          category: "meeting"
+        )
+
+        get api_v1_notes_url(contact_id: another_contact.id), headers: authenticated_headers(@firm, @user)
+        assert_response :success
+        json_response = JSON.parse(response.body)
+        assert_equal 1, json_response["data"].size
+        assert_equal "Another note", json_response["data"].first["body"]
+      end
+
+      test "should return unprocessable entity on create validation failure" do
+        post api_v1_notes_url,
+             params: { note: { body: "" } },
+             headers: authenticated_headers(@firm, @user),
+             as: :json
+        assert_response :unprocessable_entity
+        json_response = JSON.parse(response.body)
+        assert_includes json_response, "errors"
+      end
     end
   end
 end
