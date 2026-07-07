@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_07_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_07_000004) do
   create_table "account_types", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "firm_id", null: false
@@ -189,6 +189,64 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000003) do
     t.index ["firm_id"], name: "index_users_on_firm_id"
   end
 
+  create_table "workflow_process_steps", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.bigint "firm_id", null: false
+    t.string "status", default: "pending", null: false
+    t.bigint "task_id"
+    t.datetime "updated_at", null: false
+    t.bigint "workflow_process_id", null: false
+    t.bigint "workflow_template_step_id", null: false
+    t.index ["firm_id"], name: "index_workflow_process_steps_on_firm_id"
+    t.index ["status"], name: "index_workflow_process_steps_on_status"
+    t.index ["task_id"], name: "index_workflow_process_steps_on_task_id"
+    t.index ["workflow_process_id"], name: "index_workflow_process_steps_on_workflow_process_id"
+    t.index ["workflow_template_step_id"], name: "index_workflow_process_steps_on_workflow_template_step_id"
+  end
+
+  create_table "workflow_processes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "completed_at"
+    t.bigint "contact_id"
+    t.datetime "created_at", null: false
+    t.bigint "firm_id", null: false
+    t.bigint "household_id"
+    t.datetime "started_at", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "workflow_template_id", null: false
+    t.index ["contact_id"], name: "index_workflow_processes_on_contact_id"
+    t.index ["firm_id"], name: "index_workflow_processes_on_firm_id"
+    t.index ["household_id"], name: "index_workflow_processes_on_household_id"
+    t.index ["status"], name: "index_workflow_processes_on_status"
+    t.index ["workflow_template_id"], name: "index_workflow_processes_on_workflow_template_id"
+  end
+
+  create_table "workflow_template_steps", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "days_to_complete", default: 3, null: false
+    t.bigint "default_assigned_user_id", null: false
+    t.text "description"
+    t.bigint "firm_id", null: false
+    t.string "name", null: false
+    t.string "priority", default: "medium", null: false
+    t.integer "sequence_number", default: 1, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "workflow_template_id", null: false
+    t.index ["default_assigned_user_id"], name: "index_workflow_template_steps_on_default_assigned_user_id"
+    t.index ["firm_id"], name: "index_workflow_template_steps_on_firm_id"
+    t.index ["workflow_template_id"], name: "index_workflow_template_steps_on_workflow_template_id"
+  end
+
+  create_table "workflow_templates", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "firm_id", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["firm_id"], name: "index_workflow_templates_on_firm_id"
+  end
+
   add_foreign_key "account_types", "firms"
   add_foreign_key "audit_events", "firms"
   add_foreign_key "calendar_events", "contacts"
@@ -216,4 +274,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000003) do
   add_foreign_key "tasks", "users", column: "assigned_user_id"
   add_foreign_key "tasks", "users", column: "completed_by_id"
   add_foreign_key "users", "firms"
+  add_foreign_key "workflow_process_steps", "firms"
+  add_foreign_key "workflow_process_steps", "tasks"
+  add_foreign_key "workflow_process_steps", "workflow_processes"
+  add_foreign_key "workflow_process_steps", "workflow_template_steps"
+  add_foreign_key "workflow_processes", "contacts"
+  add_foreign_key "workflow_processes", "firms"
+  add_foreign_key "workflow_processes", "households"
+  add_foreign_key "workflow_processes", "workflow_templates"
+  add_foreign_key "workflow_template_steps", "firms"
+  add_foreign_key "workflow_template_steps", "users", column: "default_assigned_user_id"
+  add_foreign_key "workflow_template_steps", "workflow_templates"
+  add_foreign_key "workflow_templates", "firms"
 end

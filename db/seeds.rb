@@ -229,6 +229,50 @@ ActiveRecord::Base.transaction do
     }
   )
 
+  # 13. Create Workflow Templates and Active Processes
+  onboarding_template = Workflows::Template.create!(
+    firm: firm,
+    name: "New Client Onboarding",
+    description: "Standard multi-step onboarding process for new wealth management relationships."
+  )
+
+  onboarding_template.template_steps.create!([
+    {
+      firm: firm,
+      name: "Welcome Kit & ADV Delivery",
+      description: "Send physical welcome package and firm ADV disclosures.",
+      sequence_number: 1,
+      default_assigned_user: user2,
+      priority: "high",
+      days_to_complete: 2
+    },
+    {
+      firm: firm,
+      name: "Risk Tolerance Profile Setup",
+      description: "Administer and evaluate client risk tolerance questionnaire.",
+      sequence_number: 2,
+      default_assigned_user: user1,
+      priority: "medium",
+      days_to_complete: 5
+    },
+    {
+      firm: firm,
+      name: "Account Custody Paperwork Process",
+      description: "Generate and submit custody transfer forms to Schwab/Fidelity.",
+      sequence_number: 3,
+      default_assigned_user: user2,
+      priority: "high",
+      days_to_complete: 3
+    }
+  ])
+
+  Workflows::StartWorkflow.call(
+    firm: firm,
+    actor: user1,
+    template: onboarding_template,
+    contact: vander_anderson
+  )
+
   puts "Seeding completed successfully!"
   puts "- Created Firm: #{firm.name}"
   puts "- Created Users: #{User.count}"
