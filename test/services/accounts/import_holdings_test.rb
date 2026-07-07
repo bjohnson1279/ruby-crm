@@ -42,7 +42,7 @@ module Accounts
       @account.reload
       assert_equal 3000.00, @account.current_value
 
-      audit_event = Compliance::AuditEvent.last
+      audit_event = Compliance::AuditEvent.includes(:auditable).last
       assert_equal "updated", audit_event.action
       assert_equal @account, audit_event.auditable
       assert_match /Bulk imported 2 holdings/, audit_event.payload["message"]

@@ -2,6 +2,7 @@
 module Admin
   class BaseController < ActionController::Base
     protect_from_forgery with: :exception
+    include Pagy::Method
 
     before_action :set_context
 

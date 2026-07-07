@@ -23,7 +23,7 @@ module Contacts
         assert_equal @firm, contact.firm
       end
 
-      audit_event = Compliance::AuditEvent.last
+      audit_event = Compliance::AuditEvent.includes(:actor).last
       assert_equal "created", audit_event.action
       assert_equal @user, audit_event.actor
       assert_equal "127.0.0.1", audit_event.ip_address

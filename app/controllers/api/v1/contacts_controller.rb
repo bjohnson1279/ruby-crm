@@ -32,6 +32,7 @@ module Api
           params: contact_params,
           ip_address: request.remote_ip
         )
+        contact.strict_loading!(false)
         render_json_envelope(ContactBlueprint.render_as_hash(contact, view: :detail), status: :created)
       rescue ActiveRecord::RecordInvalid => e
         render_json_errors(e.record.errors)
@@ -54,6 +55,7 @@ module Api
           )
         end
 
+        contact.strict_loading!(false)
         render_json_envelope(ContactBlueprint.render_as_hash(contact, view: :detail))
       rescue ActiveRecord::RecordInvalid => e
         render_json_errors(e.record.errors)

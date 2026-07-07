@@ -48,9 +48,8 @@ module Api
       end
 
       test "should not show contact from another firm" do
-        assert_raises(ActiveRecord::RecordNotFound) do
-          get api_v1_contact_url(@other_contact), headers: authenticated_headers(@firm, @user)
-        end
+        get api_v1_contact_url(@other_contact), headers: authenticated_headers(@firm, @user)
+        assert_response :not_found
       end
 
       test "should create contact" do
