@@ -17,6 +17,8 @@ Rails.application.routes.draw do
       end
       resources :notes, only: [ :index, :show, :create ]
       resources :calendar, only: [ :index, :create, :update, :destroy ]
+      resources :workflow_templates, only: [ :index, :show, :create ]
+      resources :workflow_processes, only: [ :index, :show, :create ]
       get "dashboard/aum", to: "dashboard#aum"
     end
   end

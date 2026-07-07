@@ -18,6 +18,16 @@ module Tasks
           ip_address: ip_address
         )
 
+        p_step = Workflows::ProcessStep.find_by(task_id: task.id)
+        if p_step
+          Workflows::AdvanceWorkflow.call(
+            firm: firm,
+            actor: actor,
+            process_step: p_step,
+            ip_address: ip_address
+          )
+        end
+
         task
       end
     end
