@@ -128,6 +128,68 @@ ActiveRecord::Base.transaction do
     end
   end
 
+  # 10. Create Sample Tasks
+  Tasks::CreateTask.call(
+    firm: firm,
+    actor: user1,
+    params: {
+      assigned_user: user1,
+      contact: smith_john,
+      subject: "Annual Review Meeting",
+      description: "Prepare annual performance report and check asset allocation drift.",
+      due_date: 3.days.from_now.to_date,
+      priority: "high"
+    }
+  )
+
+  task_to_complete = Tasks::CreateTask.call(
+    firm: firm,
+    actor: user1,
+    params: {
+      assigned_user: user2,
+      contact: vander_gloria,
+      subject: "Sign Advisory Agreement",
+      description: "Follow up on outstanding trust documents and advisory contract signature.",
+      due_date: Date.yesterday,
+      priority: "medium"
+    }
+  )
+  Tasks::CompleteTask.call(firm: firm, actor: user2, task: task_to_complete)
+
+  Tasks::CreateTask.call(
+    firm: firm,
+    actor: user1,
+    params: {
+      assigned_user: user2,
+      contact: oconnor_liam,
+      subject: "Rollover Paperwork Setup",
+      description: "Process Schwab Traditional IRA rollover documentation.",
+      due_date: 10.days.from_now.to_date,
+      priority: "medium"
+    }
+  )
+
+  # 11. Create Sample Notes
+  Contacts::CreateNote.call(
+    firm: firm,
+    actor: user1,
+    params: {
+      contact: smith_john,
+      body: "Called client to discuss recent market volatility. Client requested to keep asset allocation unchanged.",
+      category: "call"
+    }
+  )
+
+  Contacts::CreateNote.call(
+    firm: firm,
+    actor: user2,
+    params: {
+      contact: vander_gloria,
+      body: "Met in office to review Vanderbilt Estate trust documents. Signed updated discretionary advisory agreements.",
+      category: "meeting"
+    }
+  )
+
   puts "Seeding completed successfully!"
   puts "- Created Firm: #{firm.name}"
   puts "- Created Users: #{User.count}"

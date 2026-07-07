@@ -10,6 +10,12 @@ Rails.application.routes.draw do
         resources :holdings, only: [ :index, :create ]
       end
       resources :audit_events, only: [ :index ]
+      resources :tasks, only: [ :index, :show, :create, :update ] do
+        member do
+          post :complete
+        end
+      end
+      resources :notes, only: [ :index, :show, :create ]
       get "dashboard/aum", to: "dashboard#aum"
     end
   end

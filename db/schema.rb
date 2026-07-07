@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_01_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_07_000002) do
   create_table "account_types", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "firm_id", null: false
@@ -111,6 +111,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_000004) do
     t.index ["household_id"], name: "index_investment_accounts_on_household_id"
   end
 
+  create_table "notes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.text "body", null: false
+    t.string "category", null: false
+    t.bigint "contact_id"
+    t.datetime "created_at", null: false
+    t.bigint "firm_id", null: false
+    t.bigint "household_id"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["category"], name: "index_notes_on_category"
+    t.index ["contact_id"], name: "index_notes_on_contact_id"
+    t.index ["firm_id"], name: "index_notes_on_firm_id"
+    t.index ["household_id"], name: "index_notes_on_household_id"
+    t.index ["user_id"], name: "index_notes_on_user_id"
+  end
+
   create_table "relationships", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "contact_id", null: false
     t.datetime "created_at", null: false
@@ -122,6 +138,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_000004) do
     t.index ["contact_id"], name: "index_relationships_on_contact_id"
     t.index ["firm_id"], name: "index_relationships_on_firm_id"
     t.index ["related_contact_id"], name: "index_relationships_on_related_contact_id"
+  end
+
+  create_table "tasks", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "assigned_user_id", null: false
+    t.datetime "completed_at"
+    t.bigint "completed_by_id"
+    t.bigint "contact_id"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_date", null: false
+    t.bigint "firm_id", null: false
+    t.string "priority", default: "medium", null: false
+    t.string "status", default: "pending", null: false
+    t.string "subject", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigned_user_id"], name: "index_tasks_on_assigned_user_id"
+    t.index ["completed_by_id"], name: "index_tasks_on_completed_by_id"
+    t.index ["contact_id"], name: "index_tasks_on_contact_id"
+    t.index ["due_date"], name: "index_tasks_on_due_date"
+    t.index ["firm_id"], name: "index_tasks_on_firm_id"
+    t.index ["status"], name: "index_tasks_on_status"
   end
 
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -146,8 +183,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_000004) do
   add_foreign_key "investment_accounts", "contacts"
   add_foreign_key "investment_accounts", "firms"
   add_foreign_key "investment_accounts", "households"
+  add_foreign_key "notes", "contacts"
+  add_foreign_key "notes", "firms"
+  add_foreign_key "notes", "households"
+  add_foreign_key "notes", "users"
   add_foreign_key "relationships", "contacts"
   add_foreign_key "relationships", "contacts", column: "related_contact_id"
   add_foreign_key "relationships", "firms"
+  add_foreign_key "tasks", "contacts"
+  add_foreign_key "tasks", "firms"
+  add_foreign_key "tasks", "users", column: "assigned_user_id"
+  add_foreign_key "tasks", "users", column: "completed_by_id"
   add_foreign_key "users", "firms"
 end
