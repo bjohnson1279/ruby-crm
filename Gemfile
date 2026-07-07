@@ -47,8 +47,6 @@ gem "strong_migrations"
 # Asset pipeline engine for Rails 8
 gem "propshaft"
 
-# Tailwind CSS styling for internal admin dashboard
-gem "tailwindcss-rails"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

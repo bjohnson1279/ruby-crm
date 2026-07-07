@@ -1,14 +1,14 @@
 # Run using bin/ci
 
 CI.run do
-  step "Setup", "bin/setup --skip-server"
+  step "Setup", "bundle exec ruby bin/setup --skip-server"
 
-  step "Style: Ruby", "bin/rubocop"
+  step "Style: Ruby", "bundle exec rubocop"
 
-  step "Security: Gem audit", "bin/bundler-audit"
-  step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
+  step "Security: Gem audit", "bundle exec bundler-audit"
+  step "Security: Brakeman code analysis", "bundle exec brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
 
-  step "Testing: Run minitest suite", "bin/rails test"
+  step "Testing: Run minitest suite", "bundle exec rails test"
 
 
 
