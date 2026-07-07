@@ -16,6 +16,7 @@ Rails.application.routes.draw do
         end
       end
       resources :notes, only: [ :index, :show, :create ]
+      resources :calendar, only: [ :index, :create, :update, :destroy ]
       get "dashboard/aum", to: "dashboard#aum"
     end
   end
