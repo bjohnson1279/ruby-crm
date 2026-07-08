@@ -1,6 +1,9 @@
 module Workflows
   class AdvanceWorkflow
     def self.call(firm:, actor:, process_step:, ip_address: nil)
+      process_step.strict_loading!(false)
+      process_step.workflow_template_step&.strict_loading!(false)
+
       ActiveRecord::Base.transaction do
         process_step.update!(
           status: "completed",
@@ -8,6 +11,8 @@ module Workflows
         )
 
         process = process_step.workflow_process
+        process.strict_loading!(false)
+
         current_sequence = process_step.workflow_template_step.sequence_number
 
         Compliance::AuditLogger.record(
@@ -30,7 +35,9 @@ module Workflows
 
           if next_steps.exists?
             next_steps.each do |p_step|
+              p_step.strict_loading!(false)
               t_step = p_step.workflow_template_step
+              t_step.strict_loading!(false)
 
               task = Tasks::CreateTask.call(
                 firm: firm,

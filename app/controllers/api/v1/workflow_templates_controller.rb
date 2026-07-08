@@ -49,7 +49,7 @@ module Api
       def template_params
         params.require(:workflow_template).permit(
           :name, :description,
-          template_steps_attributes: [:name, :description, :sequence_number, :default_assigned_user_id, :priority, :days_to_complete]
+          template_steps_attributes: [ :name, :description, :sequence_number, :default_assigned_user_id, :priority, :days_to_complete ]
         )
       end
     end
