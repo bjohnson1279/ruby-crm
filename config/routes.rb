@@ -19,7 +19,9 @@ Rails.application.routes.draw do
       resources :calendar, only: [ :index, :create, :update, :destroy ]
       resources :workflow_templates, only: [ :index, :show, :create ]
       resources :workflow_processes, only: [ :index, :show, :create ]
+      resources :opportunities, only: [ :index, :show, :create, :update, :destroy ]
       get "dashboard/aum", to: "dashboard#aum"
+      get "dashboard/pipeline", to: "dashboard#pipeline"
     end
   end
 

@@ -32,6 +32,18 @@ module Api
           contacts: formatted_contacts
         })
       end
+
+      def pipeline
+        summary = Opportunities::PipelineSummaryQuery.call(firm_id: current_firm.id)
+
+        render_json_envelope({
+          total_value: summary.total_value.to_s,
+          weighted_value: summary.weighted_value.to_s,
+          opportunity_count: summary.opportunity_count,
+          stages: summary.stages.map { |s| { stage: s.stage, total_value: s.total_value.to_s, weighted_value: s.weighted_value.to_s, count: s.count } },
+          advisors: summary.advisors.map { |a| { user_id: a.user_id, user_name: a.user_name, total_value: a.total_value.to_s, weighted_value: a.weighted_value.to_s, count: a.count } }
+        })
+      end
     end
   end
 end

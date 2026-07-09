@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_07_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_000001) do
   create_table "account_types", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "firm_id", null: false
@@ -145,6 +145,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000004) do
     t.index ["user_id"], name: "index_notes_on_user_id"
   end
 
+  create_table "opportunities", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.decimal "amount", precision: 18, scale: 2, default: "0.0", null: false
+    t.date "closed_at"
+    t.bigint "contact_id"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "firm_id", null: false
+    t.bigint "household_id"
+    t.string "name", null: false
+    t.integer "probability", default: 10, null: false
+    t.string "stage", default: "prospecting", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["contact_id"], name: "index_opportunities_on_contact_id"
+    t.index ["firm_id"], name: "index_opportunities_on_firm_id"
+    t.index ["household_id"], name: "index_opportunities_on_household_id"
+    t.index ["stage"], name: "index_opportunities_on_stage"
+    t.index ["user_id"], name: "index_opportunities_on_user_id"
+  end
+
   create_table "relationships", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "contact_id", null: false
     t.datetime "created_at", null: false
@@ -266,6 +286,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000004) do
   add_foreign_key "notes", "firms"
   add_foreign_key "notes", "households"
   add_foreign_key "notes", "users"
+  add_foreign_key "opportunities", "contacts"
+  add_foreign_key "opportunities", "firms"
+  add_foreign_key "opportunities", "households"
+  add_foreign_key "opportunities", "users"
   add_foreign_key "relationships", "contacts"
   add_foreign_key "relationships", "contacts", column: "related_contact_id"
   add_foreign_key "relationships", "firms"
