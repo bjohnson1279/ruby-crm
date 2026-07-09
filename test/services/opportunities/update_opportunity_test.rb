@@ -33,7 +33,7 @@ module Opportunities
       assert_equal 600_000.0, @opportunity.amount
       assert_equal 50, @opportunity.probability # Stage default callback
 
-      audit = Compliance::AuditEvent.last
+      audit = Compliance::AuditEvent.includes(:auditable).last
       assert_equal "updated", audit.action
       assert_equal @opportunity, audit.auditable
       assert_equal 500_000.0, BigDecimal(audit.payload["before"]["amount"].to_s)

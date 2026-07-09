@@ -15,10 +15,10 @@ module Accounts
         WHERE c.firm_id = ?
         GROUP BY c.id, c.first_name, c.last_name
         ORDER BY total_aum DESC, c.id ASC
-        LIMIT ?
+        LIMIT #{limit.to_i}
       SQL
 
-      sanitized_sql = ActiveRecord::Base.sanitize_sql_array([ sql, firm_id, limit ])
+      sanitized_sql = ActiveRecord::Base.sanitize_sql_array([ sql, firm_id ])
       rows = ActiveRecord::Base.connection.exec_query(sanitized_sql, "AUM by contact")
 
       rows.map do |row|

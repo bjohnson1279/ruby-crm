@@ -26,7 +26,7 @@ module Api
       test "GET aum returns successfully" do
         get api_v1_dashboard_aum_path, headers: authenticated_headers
         assert_response :success
-        json = response.parsed_body
+        json = response.parsed_body["data"]
         assert json.key?("households")
         assert json.key?("contacts")
       end
@@ -35,7 +35,7 @@ module Api
         get api_v1_dashboard_pipeline_path, headers: authenticated_headers
         assert_response :success
 
-        json = response.parsed_body
+        json = response.parsed_body["data"]
         # Won Deal is closed, so active pipeline metrics should only include the Qualified Lead ($100k total, 20% probability -> $20k weighted)
         assert_equal "100000.0", json["total_value"]
         assert_equal "20000.0", json["weighted_value"]

@@ -27,7 +27,7 @@ module Opportunities
       assert_equal 500_000.0, opp.amount
       assert_equal 10, opp.probability
 
-      audit = Compliance::AuditEvent.last
+      audit = Compliance::AuditEvent.includes(:auditable).last
       assert_equal "created", audit.action
       assert_equal opp, audit.auditable
     end
