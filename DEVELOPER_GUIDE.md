@@ -82,7 +82,7 @@ end
 
 ## 3. Domain Modules & Capabilities
 
-The core business logic is split into three main modules:
+The core business logic is split into seven main modules:
 
 ### A. Contacts Domain ([app/domains/contacts](file:///c:/Users/johns/DEV/ruby-crm/app/domains/contacts/))
 Manages client demographic records, household grouping, and familial relationships.
@@ -126,6 +126,50 @@ Audits system activity and detects data inconsistencies or business logic violat
   * [Compliance::AuditTimelineQuery](file:///c:/Users/johns/DEV/ruby-crm/app/domains/compliance/queries/audit_timeline_query.rb): Provides standard chronological logs for firm compliance, filterable by target auditable records.
   * [Compliance::IntegrityReportQuery](file:///c:/Users/johns/DEV/ruby-crm/app/domains/compliance/queries/integrity_report_query.rb): Runs raw MySQL performance audits to detect data anomalies (see Section 5 below).
 
+### D. Opportunities Domain ([app/domains/opportunities](file:///c:/Users/johns/DEV/ruby-crm/app/domains/opportunities/))
+Manages the sales pipeline, default stage probabilities, and deal summaries.
+
+* **Models**:
+  * [Opportunities::Opportunity](file:///c:/Users/johns/DEV/ruby-crm/app/domains/opportunities/models/opportunity.rb): Represents a potential transaction associated with a Contact or Household. Automatically maps standard stages (prospecting, qualification, proposal, negotiation, closed_won, closed_lost) to respective default probability values.
+* **Services**:
+  * [Opportunities::CreateOpportunity](file:///c:/Users/johns/DEV/ruby-crm/app/domains/opportunities/services/create_opportunity.rb): Instantiates opportunities and records an audit log.
+  * [Opportunities::UpdateOpportunity](file:///c:/Users/johns/DEV/ruby-crm/app/domains/opportunities/services/update_opportunity.rb): Updates details/stages and audits transitions.
+  * [Opportunities::DeleteOpportunity](file:///c:/Users/johns/DEV/ruby-crm/app/domains/opportunities/services/delete_opportunity.rb): Destroys opportunity records and logs compliance audits.
+* **Queries**:
+  * [Opportunities::PipelineSummaryQuery](file:///c:/Users/johns/DEV/ruby-crm/app/domains/opportunities/queries/pipeline_summary_query.rb): Generates high-level metrics for active opportunities (total value, weighted probability value, overall count) and groups totals by advisors and stages.
+
+### E. Calendar Domain ([app/domains/calendar](file:///c:/Users/johns/DEV/ruby-crm/app/domains/calendar/))
+Manages scheduling and events linked to users and contacts.
+
+* **Models**:
+  * [Calendar::Event](file:///c:/Users/johns/DEV/ruby-crm/app/domains/calendar/models/event.rb): Holds start/end timestamps, title, description, and designated color tag (`blue`, `green`, `red`, etc.) linked to a user and optionally a contact.
+* **Services**:
+  * [Calendar::CreateEvent](file:///c:/Users/johns/DEV/ruby-crm/app/domains/calendar/services/create_event.rb): Creates calendar events and logs the transaction.
+  * [Calendar::UpdateEvent](file:///c:/Users/johns/DEV/ruby-crm/app/domains/calendar/services/update_event.rb): Updates existing events.
+  * [Calendar::DeleteEvent](file:///c:/Users/johns/DEV/ruby-crm/app/domains/calendar/services/delete_event.rb): Destroys events and logs audit records.
+
+### F. Tasks Domain ([app/domains/tasks](file:///c:/Users/johns/DEV/ruby-crm/app/domains/tasks/))
+Handles action item tracking, priorities, status flows, and workflow integrations.
+
+* **Models**:
+  * [Tasks::Task](file:///c:/Users/johns/DEV/ruby-crm/app/domains/tasks/models/task.rb): Simple action item assigned to an advisor, optionally linked to a contact. Exposes statuses (`pending`, `completed`, `cancelled`) and priorities (`low`, `medium`, `high`).
+* **Services**:
+  * [Tasks::CreateTask](file:///c:/Users/johns/DEV/ruby-crm/app/domains/tasks/services/create_task.rb): Creates a task record.
+  * [Tasks::UpdateTask](file:///c:/Users/johns/DEV/ruby-crm/app/domains/tasks/services/update_task.rb): Updates attributes.
+  * [Tasks::CompleteTask](file:///c:/Users/johns/DEV/ruby-crm/app/domains/tasks/services/complete_task.rb): Completes a task, records audits, and automatically triggers progression on any linked workflows process step.
+
+### G. Workflows Domain ([app/domains/workflows](file:///c:/Users/johns/DEV/ruby-crm/app/domains/workflows/))
+Manages procedural sequence templates and guides processes through sequence milestones.
+
+* **Models**:
+  * [Workflows::Template](file:///c:/Users/johns/DEV/ruby-crm/app/domains/workflows/models/template.rb): Defines standard onboarding or procedural sequences (e.g. New Client Onboarding).
+  * [Workflows::TemplateStep](file:///c:/Users/johns/DEV/ruby-crm/app/domains/workflows/models/template_step.rb): Specific sequence milestones requiring action, with default assignments, priorities, and sequence order.
+  * [Workflows::Process](file:///c:/Users/johns/DEV/ruby-crm/app/domains/workflows/models/process.rb): Active execution instance of a workflow template linked to a Contact or Household.
+  * [Workflows::ProcessStep](file:///c:/Users/johns/DEV/ruby-crm/app/domains/workflows/models/process_step.rb): Tracks execution states of steps, linking back to active Tasks.
+* **Services**:
+  * [Workflows::StartWorkflow](file:///c:/Users/johns/DEV/ruby-crm/app/domains/workflows/services/start_workflow.rb): Instantiates a Process from a Template, generates ProcessSteps, and triggers the first level (Sequence 1) Tasks.
+  * [Workflows::AdvanceWorkflow](file:///c:/Users/johns/DEV/ruby-crm/app/domains/workflows/services/advance_workflow.rb): Triggered on task completion. Evaluates if all steps of the current sequence number are complete; if so, activates the next sequence layer by generating tasks. If no steps remain, marks the entire workflow Process as completed.
+
 ---
 
 ## 4. Entity Relationship Diagram
@@ -141,8 +185,18 @@ erDiagram
     FIRM ||--o{ INVESTMENT_ACCOUNT : scopes
     FIRM ||--o{ ACCOUNT_TYPE : scopes
     FIRM ||--o{ RELATIONSHIP : scopes
+    FIRM ||--o{ OPPORTUNITY : scopes
+    FIRM ||--o{ TASK : scopes
+    FIRM ||--o{ CALENDAR_EVENT : scopes
+    FIRM ||--o{ WORKFLOW_PROCESS : scopes
+    FIRM ||--o{ WORKFLOW_TEMPLATE : scopes
     
     USER ||--o{ AUDIT_EVENT : actor
+    USER ||--o{ OPPORTUNITY : assigned_to
+    USER ||--o{ CALENDAR_EVENT : schedules
+    USER ||--o{ TASK : assigned_to
+    USER ||--o{ TASK : completed_by
+    USER ||--o{ WORKFLOW_TEMPLATE_STEP : defaults
 
     CONTACT ||--o{ HOUSEHOLD_MEMBERSHIP : member_of
     HOUSEHOLD ||--o{ HOUSEHOLD_MEMBERSHIP : groups
@@ -152,13 +206,30 @@ erDiagram
     CONTACT ||--o{ INVESTMENT_ACCOUNT : owns
     HOUSEHOLD ||--o{ INVESTMENT_ACCOUNT : aggregates
     
-    ACCOUNT_TYPE ||--o{ INVESTMENT_ACCOUNT : defines
+    CONTACT ||--o{ OPPORTUNITY : links
+    CONTACT ||--o{ CALENDAR_EVENT : links
+    CONTACT ||--o{ TASK : links
+    CONTACT ||--o{ WORKFLOW_PROCESS : links
+
+    HOUSEHOLD ||--o{ OPPORTUNITY : links
+    HOUSEHOLD ||--o{ WORKFLOW_PROCESS : links
     
+    ACCOUNT_TYPE ||--o{ INVESTMENT_ACCOUNT : defines
     INVESTMENT_ACCOUNT ||--o{ HOLDING : lists
     
     INVESTMENT_ACCOUNT ||--o{ AUDIT_EVENT : auditable
     CONTACT ||--o{ AUDIT_EVENT : auditable
     HOUSEHOLD ||--o{ AUDIT_EVENT : auditable
+    OPPORTUNITY ||--o{ AUDIT_EVENT : auditable
+    TASK ||--o{ AUDIT_EVENT : auditable
+    CALENDAR_EVENT ||--o{ AUDIT_EVENT : auditable
+    WORKFLOW_PROCESS ||--o{ AUDIT_EVENT : auditable
+    WORKFLOW_PROCESS_STEP ||--o{ AUDIT_EVENT : auditable
+
+    WORKFLOW_TEMPLATE ||--o{ WORKFLOW_TEMPLATE_STEP : defines
+    WORKFLOW_PROCESS ||--o{ WORKFLOW_PROCESS_STEP : tracks
+    WORKFLOW_TEMPLATE_STEP ||--o{ WORKFLOW_PROCESS_STEP : defines
+    WORKFLOW_PROCESS_STEP ||--o| TASK : triggers
 ```
 
 ---
@@ -211,6 +282,15 @@ JSON serialization is handled by the **Blueprinter** gem. Blueprinters are locat
 * [InvestmentAccountBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/investment_account_blueprint.rb)
 * [RelationshipBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/relationship_blueprint.rb)
 * [AuditEventBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/audit_event_blueprint.rb)
+* [CalendarFeedBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/calendar_feed_blueprint.rb)
+* [EventBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/event_blueprint.rb)
+* [NoteBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/note_blueprint.rb)
+* [OpportunityBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/opportunity_blueprint.rb)
+* [ProcessBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/process_blueprint.rb)
+* [ProcessStepBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/process_step_blueprint.rb)
+* [TaskBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/task_blueprint.rb)
+* [TemplateBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/template_blueprint.rb)
+* [TemplateStepBlueprint](file:///c:/Users/johns/DEV/ruby-crm/app/blueprints/api/v1/template_step_blueprint.rb)
 
 ### Pagination
 Pagination is powered by the **Pagy** gem. Controllers return metadata fields (such as `page`, `pages`, `count`, and `next`) inside the metadata envelope to support cursor-based or offset navigation:
