@@ -15,7 +15,7 @@ module Opportunities
     def self.call(firm_id:)
       # Global aggregates for active opportunities
       summary_sql = <<~SQL
-        SELECT 
+        SELECT
           COALESCE(SUM(amount), 0) AS total_value,
           COALESCE(SUM(amount * probability / 100.0), 0) AS weighted_value,
           COUNT(id) AS opportunity_count
@@ -23,12 +23,12 @@ module Opportunities
         WHERE firm_id = ? AND stage NOT IN ('closed_won', 'closed_lost')
       SQL
 
-      sanitized_summary = ActiveRecord::Base.sanitize_sql_array([summary_sql, firm_id])
+      sanitized_summary = ActiveRecord::Base.sanitize_sql_array([ summary_sql, firm_id ])
       summary_row = ActiveRecord::Base.connection.exec_query(sanitized_summary).first
 
       # Aggregate by Stage (all opportunities)
       stage_sql = <<~SQL
-        SELECT 
+        SELECT
           stage,
           COALESCE(SUM(amount), 0) AS total_value,
           COALESCE(SUM(amount * probability / 100.0), 0) AS weighted_value,
@@ -39,7 +39,7 @@ module Opportunities
         ORDER BY stage_count DESC
       SQL
 
-      sanitized_stages = ActiveRecord::Base.sanitize_sql_array([stage_sql, firm_id])
+      sanitized_stages = ActiveRecord::Base.sanitize_sql_array([ stage_sql, firm_id ])
       stage_rows = ActiveRecord::Base.connection.exec_query(sanitized_stages)
 
       stages = stage_rows.map do |row|
@@ -53,7 +53,7 @@ module Opportunities
 
       # Aggregate by Advisor (active opportunities only)
       advisor_sql = <<~SQL
-        SELECT 
+        SELECT
           o.user_id,
           u.name AS user_name,
           COALESCE(SUM(o.amount), 0) AS total_value,
@@ -66,7 +66,7 @@ module Opportunities
         ORDER BY total_value DESC
       SQL
 
-      sanitized_advisors = ActiveRecord::Base.sanitize_sql_array([advisor_sql, firm_id])
+      sanitized_advisors = ActiveRecord::Base.sanitize_sql_array([ advisor_sql, firm_id ])
       advisor_rows = ActiveRecord::Base.connection.exec_query(sanitized_advisors)
 
       advisors = advisor_rows.map do |row|
