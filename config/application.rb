@@ -28,6 +28,7 @@ module RubyCrm
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+    config.active_storage.variant_processor = nil
 
     # Enable strict loading by default in development and test to prevent N+1 issues
     if Rails.env.development? || Rails.env.test?
