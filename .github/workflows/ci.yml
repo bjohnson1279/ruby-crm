@@ -87,7 +87,7 @@ jobs:
           DB_HOST: 127.0.0.1
 
       - name: Run Tests
-        run: bin/rails test
+        run: bin/rails test --backtrace
         env:
           RAILS_ENV: test
           DB_HOST: 127.0.0.1
