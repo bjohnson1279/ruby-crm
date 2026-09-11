@@ -66,6 +66,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      - name: Check for Merge Conflict Markers
+        run: |
+          echo "Scanning codebase for git merge conflict markers..."
+          if git grep -n -I -E '^(<{7}|={7}|>{7}|\|{7})([[:space:]]|$)'; then
+            echo "::error::Merge conflict markers detected in tracked files! Please resolve conflicts before merging."
+            exit 1
+          fi
+          echo "No conflict markers detected."
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -78,7 +87,7 @@ jobs:
           DB_HOST: 127.0.0.1
 
       - name: Run Tests
-        run: bin/rails test
+        run: bin/rails test --backtrace
         env:
           RAILS_ENV: test
           DB_HOST: 127.0.0.1
